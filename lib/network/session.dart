@@ -69,6 +69,20 @@ class Session {
     }
   }
 
+  Uint8List chunkToFile() {
+    var file = Uint8List(fileSize!);
+
+    for (int chunk in chunks.keys) {
+      file.setRange(
+        chunk * chunkSize,
+        min((chunk + 1) * chunkSize, fileSize!),
+        chunks[chunk]!,
+      );
+    }
+
+    return file;
+  }
+
   Session.student() {
     mode = Mode.student;
     advertiser = Advertiser();
@@ -115,6 +129,9 @@ class Session {
         }
         await Future.delayed(Duration(milliseconds: 1));
       }
+      scanner.stop();
+      print("All packets received\n");
+      print("File:  ${chunkToFile()}");
     } else {
       restartAdvertiser();
     }
