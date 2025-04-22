@@ -83,6 +83,7 @@ class Advertiser {
     try {
       if (broadcast == null) throw Exception("Not initialized");
       await broadcast!.stop();
+      isRunning = false;
     } catch (e) {
       //
     }
@@ -123,6 +124,7 @@ class Scanner {
     try {
       if (discovery == null) throw Exception("Not initialized");
       await discovery!.stop();
+      isRunning = false;
     } catch (e) {
       //
     }

@@ -51,6 +51,7 @@ class Session {
 
   void fileToChunks(Uint8List file) {
     fileSize = file.length;
+    print("size: $fileSize");
 
     for (
       int chunk = 0, bytes = 0;
@@ -106,47 +107,50 @@ class Session {
       scanner.start();
 
       while (!completed) {
-        if (knowHosts.isNotEmpty) {
-          if (!found) {
-            var attr = knowHosts.values.first.attributes;
-            fileName = attr.name;
-            fileSize = attr.size;
-            int numChunks = (fileSize! / chunkSize).ceil();
-            pending = Set<int>.from(
-              List<int>.generate(numChunks, (index) => index),
-            );
-            found = true;
-          }
-
-          for (var host in knowHosts.values) {
-            var common = host.attributes.available.intersection(pending!);
-            if (common.isNotEmpty) {
-              var chunk = common.first;
-
-              var req = await client.getChunk(
-                host.attributes.host,
-                host.attributes.port,
-                chunk,
+        try {
+          if (knowHosts.isNotEmpty) {
+            if (!found) {
+              var attr = knowHosts.values.first.attributes;
+              fileName = attr.name;
+              fileSize = attr.size;
+              int numChunks = (fileSize! / chunkSize).ceil();
+              pending = Set<int>.from(
+                List<int>.generate(numChunks, (index) => index),
               );
+              found = true;
+            }
 
-              if (!req) continue;
+            for (var host in knowHosts.values) {
+              var common = host.attributes.available.intersection(pending!);
+              if (common.isNotEmpty) {
+                var chunk = common.first;
 
-              pending!.remove(chunk);
-              print("Pending chunks: $pending");
+                var req = await client.getChunk(
+                  host.attributes.host,
+                  host.attributes.port,
+                  chunk,
+                );
 
-              if (pending!.isEmpty) {
-                completed = true;
+                if (!req) continue;
+
+                pending!.remove(chunk);
+                print("Pending chunks: $pending");
+
+                if (pending!.isEmpty) {
+                  completed = true;
+                }
+                restartAdvertiser();
+                continue;
               }
-              restartAdvertiser();
-              continue;
             }
           }
+          await Future.delayed(Duration(milliseconds: 1));
+        } catch (e) {
+          print(e);
         }
-        await Future.delayed(Duration(milliseconds: 1));
       }
       scanner.stop();
-      print("All packets received\n");
-      print("File:  ${chunkToFile()}");
+      return;
     } else {
       restartAdvertiser();
     }
