@@ -78,6 +78,15 @@ class Advertiser {
     await broadcast!.stop();
     isRunning = false;
   }
+
+  Future<void> flush() async {
+    try {
+      if (broadcast == null) throw Exception("Not initialized");
+      await broadcast!.stop();
+    } catch (e) {
+      //
+    }
+  }
 }
 
 class Scanner {
@@ -106,7 +115,16 @@ class Scanner {
   Future<void> stop() async {
     if (discovery == null) throw Exception("Not initialized");
     if (!isRunning) return;
-    await discovery!.start();
+    await discovery!.stop();
     isRunning = false;
+  }
+
+  Future<void> flush() async {
+    try {
+      if (discovery == null) throw Exception("Not initialized");
+      await discovery!.stop();
+    } catch (e) {
+      //
+    }
   }
 }

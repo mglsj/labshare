@@ -73,6 +73,8 @@ class Session {
   }
 
   Uint8List chunkToFile() {
+    print(chunks);
+
     var file = Uint8List(fileSize!);
 
     int numChunks = (fileSize! / chunkSize).ceil();
@@ -99,8 +101,10 @@ class Session {
     id = uuid.v4();
 
     if (mode == Mode.student) {
+      await scanner.flush();
       await scanner.init();
       scanner.start();
+
       while (!completed) {
         if (knowHosts.isNotEmpty) {
           if (!found) {
@@ -116,16 +120,24 @@ class Session {
 
           for (var host in knowHosts.values) {
             var common = host.attributes.available.intersection(pending!);
-            if (common.isNotEmpty &&
-                await client.getChunk(
-                  host.attributes.host,
-                  host.attributes.port,
-                  common.first,
-                )) {
-              pending!.remove(common.first);
+            if (common.isNotEmpty) {
+              var chunk = common.first;
+
+              var req = await client.getChunk(
+                host.attributes.host,
+                host.attributes.port,
+                chunk,
+              );
+
+              if (!req) continue;
+
+              pending!.remove(chunk);
+              print("Pending chunks: $pending");
+
               if (pending!.isEmpty) {
                 completed = true;
               }
+              restartAdvertiser();
               continue;
             }
           }
@@ -141,10 +153,15 @@ class Session {
   }
 
   Future<void> stop() async {
-    await Future.wait([advertiser.stop(), scanner.stop(), server.stop()]);
+    try {
+      await Future.wait([advertiser.stop(), scanner.stop(), server.stop()]);
+    } catch (e) {
+      print(e);
+    }
   }
 
   Future<void> restartAdvertiser() async {
+    await advertiser.flush();
     await advertiser.init(
       ServiceAttributes(
         id: id,
@@ -168,7 +185,8 @@ class Session {
       case BonsoirDiscoveryEventType.discoveryServiceResolved:
         try {
           var attributes = ServiceAttributes.fromMap(event.service!.attributes);
-          if (attributes.id != id) {
+
+          if (attributes.host != await info.getWifiIP()) {
             knowHosts[attributes.id] = Host(attributes: attributes);
             print("Host added to known list ${attributes.id}");
           }
