@@ -1,19 +1,21 @@
 import 'package:bonsoir/bonsoir.dart';
 import 'package:labshare/network/session.dart';
 
-const id = "1234";
 const serviceType = "_labshare._tcp";
 const serviceName = "LabShare";
-const chunkSize = 1024; //BYTES
 
 class ServiceAttributes {
   late String id;
+  late String host;
+  late int port;
   late String name;
   late int size;
   late Set<int> available;
 
   ServiceAttributes({
     required this.id, // device id
+    required this.host,
+    required this.port,
     required this.name, // file name
     required this.size, // file size in bytes
     required this.available, // list of available chunks
@@ -21,6 +23,8 @@ class ServiceAttributes {
 
   ServiceAttributes.fromMap(Map<String, String> map) {
     id = map["id"] ?? "";
+    host = map["host"] ?? "";
+    port = int.tryParse(map["port"] ?? "0") ?? 0;
     name = map["name"] ?? "";
     size = int.tryParse(map["size"] ?? "0") ?? 0;
     available =
@@ -34,8 +38,10 @@ class ServiceAttributes {
   Map<String, String> toMap() {
     return {
       "id": id,
+      "host": host,
+      "port": port.toString(),
       "name": name,
-      "size": '$size',
+      "size": size.toString(),
       "available": available.join(','),
     };
   }

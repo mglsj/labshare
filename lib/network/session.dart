@@ -5,20 +5,26 @@ import 'package:bonsoir/bonsoir.dart';
 import 'package:labshare/network/client.dart';
 import 'package:labshare/network/mdns.dart';
 import 'package:labshare/network/server.dart';
+import 'package:labshare/protocol.dart';
+import 'package:network_info_plus/network_info_plus.dart';
+import 'package:uuid/uuid.dart';
+
+const uuid = Uuid();
 
 enum Mode { teacher, student }
 
 class Host {
-  String hostname;
-  int port;
   ServiceAttributes attributes;
 
-  Host({required this.hostname, required this.port, required this.attributes});
+  Host({required this.attributes});
 }
 
 class Session {
   bool found = false;
   late Mode mode;
+
+  late String id;
+  final info = NetworkInfo();
 
   String? fileName;
   int? fileSize;
@@ -73,6 +79,7 @@ class Session {
 
   Future<void> start() async {
     await server.start();
+    id = uuid.v4();
 
     if (mode == Mode.student) {
       await scanner.init();
@@ -93,7 +100,11 @@ class Session {
           for (var host in knowHosts.values) {
             var common = host.attributes.available.intersection(pending!);
             if (common.isNotEmpty &&
-                await client.getChunk(host.hostname, host.port, common.first)) {
+                await client.getChunk(
+                  host.attributes.host,
+                  host.attributes.port,
+                  common.first,
+                )) {
               pending!.remove(common.first);
               if (pending!.isEmpty) {
                 completed = true;
@@ -117,6 +128,8 @@ class Session {
     await advertiser.init(
       ServiceAttributes(
         id: id,
+        host: await info.getWifiIP() ?? "",
+        port: port,
         name: fileName!,
         size: fileSize!,
         available: chunks.keys.toSet(),
@@ -133,24 +146,21 @@ class Session {
       case BonsoirDiscoveryEventType.discoveryServiceFound:
         event.service!.resolve(discovery.serviceResolver);
       case BonsoirDiscoveryEventType.discoveryServiceResolved:
-        print('Service resolved : ${event.service?.toJson()["service.host"]}');
-
         try {
           var attributes = ServiceAttributes.fromMap(event.service!.attributes);
           if (attributes.id != id) {
-            knowHosts[attributes.id] = Host(
-              hostname: event.service!.toJson()["service.host"],
-              port: event.service!.port,
-              attributes: attributes,
-            );
+            knowHosts[attributes.id] = Host(attributes: attributes);
+            print("Host added to known list ${attributes.id}");
           }
         } catch (e) {
           // ignore
         }
 
       case BonsoirDiscoveryEventType.discoveryServiceLost:
-        print('Service lost : ${event.service?.toJson()}');
         knowHosts.remove(event.service!.attributes["id"] ?? "");
+        print(
+          "Host removed from known list ${event.service!.attributes["id"]}",
+        );
       default:
     }
   }

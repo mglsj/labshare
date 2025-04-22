@@ -14,6 +14,7 @@ class TcpClient {
     status = false;
 
     try {
+      print("Client: trying connection");
       var socket = await Socket.connect(host, port);
       print("Client: Server connected");
 
