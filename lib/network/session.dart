@@ -57,7 +57,8 @@ class Session {
       bytes < fileSize!;
       bytes += chunkSize, chunk++
     ) {
-      var chunkData = file.sublist(bytes, min(bytes + chunk, fileSize!));
+      int end = min(bytes + chunkSize, fileSize!);
+      var chunkData = file.sublist(bytes, end);
 
       if (chunkData.length != chunkSize) {
         var paddedChunk = Uint8List(chunkSize);
@@ -67,17 +68,19 @@ class Session {
 
       chunks[chunk] = chunkData;
     }
+
+    print(chunks);
   }
 
   Uint8List chunkToFile() {
     var file = Uint8List(fileSize!);
 
-    for (int chunk in chunks.keys) {
-      file.setRange(
-        chunk * chunkSize,
-        min((chunk + 1) * chunkSize, fileSize!),
-        chunks[chunk]!,
-      );
+    int numChunks = (fileSize! / chunkSize).ceil();
+    for (int chunk = 0; chunk < numChunks; chunk++) {
+      var chunkData = chunks[chunk]!;
+      int start = chunk * chunkSize;
+      int end = (chunk == numChunks - 1) ? fileSize! : start + chunkSize;
+      file.setRange(start, end, chunkData.sublist(0, end - start));
     }
 
     return file;

@@ -7,11 +7,11 @@ import 'package:labshare/protocol.dart';
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // var session = Session.teacher(
-  //   file: Uint8List(2 * chunkSize + 100)
-  //     ..setAll(0, List.filled(2 * chunkSize + 100, 1)),
-  //   fileName: "Test.txt",
-  // );
-  var session = Session.student();
+  var file = Uint8List(2 * chunkSize + 100)
+    ..setAll(0, List.generate(2 * chunkSize + 40, (index) => index & 1));
+  // print(file);
+
+  var session = Session.teacher(file: file, fileName: "Test.txt");
+  // var session = Session.student();
   session.start();
 }
