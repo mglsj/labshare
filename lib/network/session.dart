@@ -98,13 +98,15 @@ class Session {
   }
 
   Future<void> start() async {
+    await server.flush();
     await server.start();
+
     id = uuid.v4();
 
     if (mode == Mode.student) {
       await scanner.flush();
       await scanner.init();
-      scanner.start();
+      await scanner.start();
 
       while (!completed) {
         try {
@@ -158,7 +160,7 @@ class Session {
 
   Future<void> stop() async {
     try {
-      await Future.wait([advertiser.stop(), scanner.stop(), server.stop()]);
+      await Future.wait([advertiser.stop(), scanner.stop(), server.close()]);
     } catch (e) {
       print(e);
     }

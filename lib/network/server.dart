@@ -20,8 +20,16 @@ class TcpServer {
     server.listen((socket) => handleConnection(socket));
   }
 
-  Future<void> stop() async {
+  Future<void> close() async {
     await server.close();
+  }
+
+  Future<void> flush() async {
+    try {
+      await close();
+    } catch (e) {
+      //
+    }
   }
 
   void handleConnection(Socket socket) {

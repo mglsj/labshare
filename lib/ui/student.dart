@@ -11,11 +11,11 @@ class StudentScreen extends StatefulWidget {
   State<StudentScreen> createState() => _StudentScreenState();
 }
 
-enum UiStage { scanning, received, saved }
+enum UiStage { idle, scanning, received, saved }
 
 class _StudentScreenState extends State<StudentScreen> {
   Session? session;
-  UiStage uiStage = UiStage.scanning;
+  UiStage uiStage = UiStage.idle;
 
   @override
   void initState() {
@@ -24,7 +24,17 @@ class _StudentScreenState extends State<StudentScreen> {
     session = Session.student();
   }
 
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+    session?.stop();
+  }
+
   void scan() async {
+    setState(() {
+      uiStage = UiStage.scanning;
+    });
     await session?.start();
     var bytes = session!.chunkToFile();
 
@@ -52,6 +62,9 @@ class _StudentScreenState extends State<StudentScreen> {
     return Scaffold(
       appBar: AppBar(title: Text("Student Dash")),
       body: switch (uiStage) {
+        (UiStage.idle) => Center(
+          child: MaterialButton(onPressed: scan, child: Text("Start Scan")),
+        ),
         (UiStage.scanning) => Center(child: Text("Scanning and downloading")),
         (UiStage.received) => Center(child: Text("Saving File...")),
         (UiStage.saved) => Center(child: Text("Completed")),
