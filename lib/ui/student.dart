@@ -48,7 +48,7 @@ class _StudentScreenState extends State<StudentScreen> with WindowListener {
             actions: [
               Button(
                 onPressed: () async {
-                  await session?.stop();
+                  session?.stop();
                   await windowManager.destroy();
                 },
                 child: Text('Close'),

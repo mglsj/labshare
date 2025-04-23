@@ -160,7 +160,7 @@ class Session {
 
   Future<void> stop() async {
     try {
-      await Future.wait([server.close(), advertiser.stop(), scanner.stop()]);
+      await Future.wait([server.flush(), advertiser.flush(), scanner.flush()]);
     } catch (e) {
       print(e);
     }
