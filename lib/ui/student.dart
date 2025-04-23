@@ -71,6 +71,8 @@ class _StudentScreenState extends State<StudentScreen> with WindowListener {
       uiStage = UiStage.scanning;
     });
     await session?.start();
+    backgroundSeed();
+
     var bytes = session!.chunkToFile();
 
     setState(() {
@@ -90,6 +92,13 @@ class _StudentScreenState extends State<StudentScreen> with WindowListener {
     setState(() {
       uiStage = UiStage.saved;
     });
+  }
+
+  void backgroundSeed() async {
+    while (true) {
+      session!.restartAdvertiser();
+      await Future.delayed(Duration(seconds: 2));
+    }
   }
 
   @override

@@ -152,10 +152,12 @@ class Session {
         }
       }
       scanner.stop();
-      restartAdvertiser();
       return;
     } else {
-      restartAdvertiser();
+      while (true) {
+        restartAdvertiser();
+        await Future.delayed(Duration(seconds: 2));
+      }
     }
   }
 
