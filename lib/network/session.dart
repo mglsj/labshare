@@ -156,7 +156,7 @@ class Session {
     } else {
       while (true) {
         restartAdvertiser();
-        await Future.delayed(Duration(seconds: 2));
+        await Future.delayed(Duration(seconds: 5));
       }
     }
   }

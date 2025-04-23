@@ -97,7 +97,7 @@ class _StudentScreenState extends State<StudentScreen> with WindowListener {
   void backgroundSeed() async {
     while (true) {
       session!.restartAdvertiser();
-      await Future.delayed(Duration(seconds: 2));
+      await Future.delayed(Duration(seconds: 5));
     }
   }
 
