@@ -70,11 +70,11 @@ class Session {
       chunks[chunk] = chunkData;
     }
 
-    print(chunks);
+    // print(chunks);
   }
 
   Uint8List chunkToFile() {
-    print(chunks);
+    // print(chunks);
 
     var file = Uint8List(fileSize!);
 
