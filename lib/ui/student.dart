@@ -48,6 +48,7 @@ class _StudentScreenState extends State<StudentScreen> with WindowListener {
             actions: [
               Button(
                 onPressed: () async {
+                  await session?.stop();
                   await windowManager.destroy();
                 },
                 child: Text('Close'),
@@ -99,6 +100,7 @@ class _StudentScreenState extends State<StudentScreen> with WindowListener {
         leading: IconButton(
           icon: Icon(FluentIcons.back),
           onPressed: () {
+            session?.stop();
             context.pushReplacementNamed("home");
           },
         ),
