@@ -77,6 +77,7 @@ class TcpServer {
           return;
         }
 
+        print("Server: chunk not found $requestedChunk");
         socket.add([ResponseCode.notFound.index]);
         await socket.flush();
         socket.destroy();
