@@ -68,6 +68,7 @@ class TcpServer {
         print("Server: Chunk $requestedChunk requested");
 
         if (session.chunks.containsKey(requestedChunk)) {
+          print("Server: sending chunk $requestedChunk");
           socket.add([
             ResponseCode.ok.index,
             ...(session.chunks[requestedChunk]!),
