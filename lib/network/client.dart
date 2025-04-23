@@ -29,30 +29,40 @@ class TcpClient {
       socket.add(data);
       await socket.flush();
 
+      final List<int> buffer = [];
+
       socket.listen(
         (bytes) {
           // handle incoming bytes
-          if (bytes.length == 1) {
-            print('Client: server response ${ResponseCode.values[bytes[0]]}');
-          } else if (bytes[0] == ResponseCode.ok.index &&
-              bytes.length == chunkSize + 1) {
-            print("Client: Chunk $chunk OK");
-            session.chunks[chunk] = bytes.sublist(1);
-            status = true;
-          } else {
-            print("Client: Invalid response or chunk");
-          }
-
-          // once we've got what we need, complete()
-          if (!completer.isCompleted) {
-            completer.complete(status);
-            socket.destroy();
+          buffer.addAll(bytes);
+          const expectedLen = chunkSize + 1;
+          if (buffer.length >= expectedLen) {
+            final code = buffer[0];
+            if (code == ResponseCode.ok.index) {
+              // extract chunk payload
+              final payload = buffer.sublist(1, expectedLen);
+              session.chunks[chunk] = Uint8List.fromList(payload);
+              status = true;
+            } else {
+              print('Client: server response ${ResponseCode.values[code]}');
+            }
+            // once we've got what we need, complete()
+            if (!completer.isCompleted) {
+              completer.complete(status);
+              socket.destroy();
+            }
           }
         },
         onDone: () {
           print('Client: Connection closed');
-          if (!completer.isCompleted) completer.complete(status);
-          socket.destroy();
+          if (!completer.isCompleted) {
+            if (buffer.isNotEmpty) {
+              final code = buffer[0];
+              status = code == ResponseCode.ok.index;
+            }
+            completer.complete(status);
+            socket.destroy();
+          }
         },
         onError: (error) {
           print('Client: $error');
