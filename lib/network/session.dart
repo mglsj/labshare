@@ -152,6 +152,7 @@ class Session {
         }
       }
       scanner.stop();
+      restartAdvertiser();
       return;
     } else {
       restartAdvertiser();

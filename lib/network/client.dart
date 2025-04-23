@@ -76,22 +76,4 @@ class TcpClient {
     }
     return completer.future;
   }
-
-  //   void onData(Uint8List data, int chunk, Socket socket) {
-  //     if (data.length == 1) {
-  //       print('Client: server response ${ResponseCode.values[data[0]]}');
-  //       return;
-  //     }
-  //     if (data[0] == ResponseCode.ok.index) {
-  //       if (data.length == chunkSize + 1) {
-  //         print("Client: Chunk $chunk OK");
-  //         session.chunks[chunk] = data.sublist(1);
-  //         status = true;
-  //         return;
-  //       }
-  //       print("Client: Invalid chunk");
-  //       return;
-  //     }
-  //     print("Client: Invalid response code");
-  //   }
 }
