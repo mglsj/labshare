@@ -148,6 +148,14 @@ class _StudentScreenState extends State<StudentScreen> with WindowListener {
             ],
             (UiStage.saved) => [
               Text("Transfer Completed, seeding to other peers"),
+              const SizedBox(height: 10),
+              Button(
+                child: Text("Close"),
+                onPressed: () async {
+                  await session!.stop();
+                  context.pushReplacementNamed("home");
+                },
+              ),
             ],
           },
         ),

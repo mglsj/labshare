@@ -146,6 +146,14 @@ class _TeacherScreenState extends State<TeacherScreen> with WindowListener {
               Text("File is being shared", style: TextStyle(fontSize: 40)),
               const SizedBox(height: 20),
               ProgressBar(),
+              const SizedBox(height: 10),
+              Button(
+                child: Text("Close"),
+                onPressed: () async {
+                  await session!.stop();
+                  context.pushReplacementNamed("home");
+                },
+              ),
             ],
           },
         ),
